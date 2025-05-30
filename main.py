@@ -3,38 +3,25 @@ Recursive Drift Engine: Main Application Entry Point
 Enhanced Mystical Simulation with Comprehensive Features
 """
 
-import tkinter as tk
-from tkinter import ttk, messagebox
 import threading
 import os
 import sys
+import time
+import json
 from datetime import datetime
 
 # Import custom modules
 from drift_engine import DriftEngine
-from ui_components import MysticalUI
 from persistence import GameState
-from audio_manager import AudioManager
-from visual_effects import VisualEffectsManager
 
 class RecursiveDriftApplication:
     """Main application class that orchestrates all systems"""
     
     def __init__(self):
-        self.root = tk.Tk()
-        self.setup_window()
-        
         # Initialize core systems
         self.drift_engine = DriftEngine()
         self.game_state = GameState()
-        self.audio_manager = AudioManager()
-        self.visual_effects = VisualEffectsManager(self.root)
-        
-        # Initialize UI
-        self.ui = MysticalUI(self.root, self.drift_engine, self.audio_manager, self.visual_effects)
-        
-        # Setup event bindings
-        self.setup_bindings()
+        self.running = True
         
         # Load saved state if exists
         self.load_game_state()

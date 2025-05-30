@@ -16,7 +16,7 @@ from time_mechanics import ChronoSystem
 from oracle_system import OracleSystem
 from mini_games import EntropyRitesSystem
 from market_system import FragmentMarket
-from assets.glyphs import GlyphManager
+from glyphs import GlyphManager
 
 class DriftEngine:
     """Main engine that coordinates all mystical systems"""
