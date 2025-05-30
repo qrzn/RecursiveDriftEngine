@@ -7,6 +7,7 @@ import time
 import json
 import random
 from datetime import datetime
+from narrative_engine import NarrativeEngine
 
 # Core glyphs for the drift field
 GLYPHS = ["▲", "⊗", "≈", "∇", "∆"]
@@ -29,6 +30,9 @@ class SimpleDriftEngine:
         
         # Game history
         self.operation_log = []
+        
+        # Narrative engine for procedural storytelling
+        self.narrative_engine = NarrativeEngine()
         
     def generate_drift_map(self, width=5, height=5):
         """Generate a mystical drift field map"""
@@ -65,12 +69,17 @@ class SimpleDriftEngine:
         # Log the operation
         operation = {
             "type": "fork",
-            "fork_id": fork_id,
+            "node_id": fork_id,
             "entropy_change": round(entropy_change, 3),
+            "entropy_level": self.entropy_level,
             "rewards": {"time_salt": salt_reward, "fragments": fragment_reward},
             "timestamp": datetime.now().isoformat()
         }
         self.operation_log.append(operation)
+        
+        # Generate narrative
+        narrative_result = self.narrative_engine.process_action(operation, self.get_status())
+        operation["narrative"] = narrative_result
         
         return operation
     
@@ -91,11 +100,17 @@ class SimpleDriftEngine:
         # Log the operation
         operation = {
             "type": "collapse",
+            "node_id": self.node_id,
             "entropy_reduction": round(entropy_reduction, 3),
+            "entropy_level": self.entropy_level,
             "rewards": {"time_salt": salt_reward, "fragments": fragment_reward},
             "timestamp": datetime.now().isoformat()
         }
         self.operation_log.append(operation)
+        
+        # Generate narrative
+        narrative_result = self.narrative_engine.process_action(operation, self.get_status())
+        operation["narrative"] = narrative_result
         
         return operation
     
@@ -117,13 +132,21 @@ class SimpleDriftEngine:
         self.identity_fragments += fragment_reward
         self.total_operations += 1
         
-        return {
+        operation = {
             "type": "memory_wipe",
+            "node_id": self.node_id,
             "operations_wiped": wiped_operations,
             "entropy_reset": round(old_entropy - 0.5, 3),
+            "entropy_level": self.entropy_level,
             "rewards": {"time_salt": salt_reward, "fragments": fragment_reward},
             "timestamp": datetime.now().isoformat()
         }
+        
+        # Generate narrative (this will create a new timeline)
+        narrative_result = self.narrative_engine.process_action(operation, self.get_status())
+        operation["narrative"] = narrative_result
+        
+        return operation
     
     def scan_field(self):
         """Scan the current drift field"""
@@ -215,6 +238,8 @@ wipe     - Memory wipe (resets entropy, major rewards)
 enclave  - Change enclave (void/entropy/crystal)
 status   - Show current system status
 prophecy - Generate a mystical prophecy
+story    - View recent narrative threads
+timeline - Show timeline information
 help     - Show this help message
 quit     - Exit the drift field
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -261,6 +286,92 @@ Temporal Range: {random.choice(['immediate', 'near future', 'distant echoes'])}
 ━━━━━━━━━━━━━━━━━━
 """)
 
+def show_recent_story(engine):
+    """Display recent narrative threads"""
+    if not engine.narrative_engine.timelines:
+        print("\n📖 No narrative threads yet. Perform some actions to begin your story.")
+        return
+        
+    current_timeline = list(engine.narrative_engine.timelines.keys())[-1]
+    timeline = engine.narrative_engine.timelines[current_timeline]
+    
+    print(f"""
+📖 Recent Narrative Threads ({current_timeline})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Narrative Tone: {timeline.narrative_tone}
+Dominant Themes: {', '.join(timeline.dominant_themes)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+""")
+    
+    recent_threads = engine.narrative_engine.get_recent_narrative(current_timeline, 3)
+    for i, thread in enumerate(recent_threads, 1):
+        print(f"{i}. {thread['story_fragment']}")
+        print(f"   Themes: {', '.join(thread['themes'])}")
+        print()
+        
+    # Show character events if any
+    if timeline.character_entities:
+        print("🎭 Active Characters:")
+        for char_id, char_data in list(timeline.character_entities.items())[-2:]:
+            print(f"   • {char_data['character_type'].replace('_', ' ').title()}: {char_data['character_data']['description']}")
+        print()
+
+def show_timeline_info(engine):
+    """Display timeline information"""
+    if not engine.narrative_engine.timelines:
+        print("\n⏳ No timelines created yet.")
+        return
+        
+    print(f"""
+⏳ Timeline Overview
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Timelines: {len(engine.narrative_engine.timelines)}
+Cross-Timeline Events: {len(engine.narrative_engine.cross_timeline_events)}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+""")
+    
+    for timeline_id in engine.narrative_engine.timelines:
+        summary = engine.narrative_engine.get_timeline_summary(timeline_id)
+        print(f"""Timeline: {timeline_id}
+   Tone: {summary['narrative_tone']}
+   Themes: {', '.join(summary['dominant_themes'][:3])}
+   Story Threads: {summary['thread_count']}
+   Characters: {summary['character_count']}
+""")
+        
+    # Show recent cross-timeline events
+    if engine.narrative_engine.cross_timeline_events:
+        recent_cross = engine.narrative_engine.cross_timeline_events[-1]
+        print(f"🌀 Latest Cross-Timeline Event:")
+        print(f"   {recent_cross['event_data']['description']}")
+        print()
+
+def display_narrative_result(result):
+    """Display narrative results from actions"""
+    if "narrative" not in result:
+        return
+        
+    narrative = result["narrative"]
+    
+    print(f"""
+📜 {narrative['narrative_fragment']}
+   Timeline: {narrative['timeline_id']} ({narrative['narrative_tone']})""")
+    
+    if "character_event" in narrative:
+        char_event = narrative["character_event"]
+        print(f"""
+🎭 Character Emergence!
+   {char_event['character_type'].replace('_', ' ').title()}: {char_event['character_description']}
+   
+   {char_event['emergence_story']}""")
+        
+    if "cross_timeline_event" in narrative:
+        cross_event = narrative["cross_timeline_event"]
+        if cross_event["type"] != "no_cross_event":
+            print(f"""
+🌀 Cross-Timeline Event!
+   {cross_event['description']}""")
+
 def main():
     """Main application loop"""
     print("""
@@ -301,9 +412,10 @@ def main():
             elif command == "fork":
                 result = engine.fork_node()
                 print(f"""
-⚡ Node forked: {result['fork_id']}
+⚡ Node forked: {result.get('node_id', 'unknown')}
    Entropy increase: +{result['entropy_change']:.3f}
    Rewards: ⧗{result['rewards']['time_salt']} ◊{result['rewards']['fragments']}""")
+                display_narrative_result(result)
                 
             elif command == "collapse":
                 result = engine.collapse_node()
@@ -311,6 +423,7 @@ def main():
 💥 Node collapsed successfully!
    Entropy reduction: -{result['entropy_reduction']:.3f}
    Rewards: ⧗{result['rewards']['time_salt']} ◊{result['rewards']['fragments']}""")
+                display_narrative_result(result)
                 
             elif command == "wipe":
                 result = engine.memory_wipe()
@@ -319,12 +432,19 @@ def main():
    Operations cleared: {result['operations_wiped']}
    Entropy reset: {result['entropy_reset']:+.3f}
    Major rewards: ⧗{result['rewards']['time_salt']} ◊{result['rewards']['fragments']}""")
+                display_narrative_result(result)
                 
             elif command == "status":
                 display_status(engine)
                 
             elif command == "prophecy":
                 generate_prophecy(engine)
+                
+            elif command == "story":
+                show_recent_story(engine)
+                
+            elif command == "timeline":
+                show_timeline_info(engine)
                 
             elif command.startswith("enclave"):
                 parts = command.split()
