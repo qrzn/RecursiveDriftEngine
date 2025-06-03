@@ -8,6 +8,7 @@ import json
 import random
 from datetime import datetime
 from narrative_engine import NarrativeEngine
+from persistence import GameState
 
 # Core glyphs for the drift field
 GLYPHS = ["▲", "⊗", "≈", "∇", "∆"]
@@ -203,6 +204,34 @@ class SimpleDriftEngine:
             "operation_history": len(self.operation_log)
         }
 
+    def export_state(self):
+        """Export current engine state for saving"""
+        return {
+            "node_id": self.node_id,
+            "entropy_level": self.entropy_level,
+            "time_salt": self.time_salt,
+            "identity_fragments": self.identity_fragments,
+            "fork_count": self.fork_count,
+            "total_operations": self.total_operations,
+            "current_enclave": self.current_enclave,
+            "current_drift_map": self.current_drift_map,
+            "operation_log": self.operation_log,
+        }
+
+    def import_state(self, state):
+        """Load engine state from saved data"""
+        if not state:
+            return
+        self.node_id = state.get("node_id", self.node_id)
+        self.entropy_level = state.get("entropy_level", self.entropy_level)
+        self.time_salt = state.get("time_salt", self.time_salt)
+        self.identity_fragments = state.get("identity_fragments", self.identity_fragments)
+        self.fork_count = state.get("fork_count", self.fork_count)
+        self.total_operations = state.get("total_operations", self.total_operations)
+        self.current_enclave = state.get("current_enclave", self.current_enclave)
+        self.current_drift_map = state.get("current_drift_map", self.current_drift_map)
+        self.operation_log = state.get("operation_log", [])
+
 def display_drift_map(drift_map):
     """Display the drift field map"""
     print("\n📍 Current Drift Field:")
@@ -240,6 +269,8 @@ status   - Show current system status
 prophecy - Generate a mystical prophecy
 story    - View recent narrative threads
 timeline - Show timeline information
+save     - Save game state to file
+load     - Load game state from file
 help     - Show this help message
 quit     - Exit the drift field
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -383,8 +414,9 @@ def main():
 🌌 Entering the drift field...
 """)
     
-    # Initialize the engine
+    # Initialize the engine and persistence
     engine = SimpleDriftEngine()
+    game_state = GameState()
     
     # Display initial status
     display_status(engine)
@@ -445,7 +477,25 @@ def main():
                 
             elif command == "timeline":
                 show_timeline_info(engine)
-                
+
+            elif command == "save":
+                state_data = {
+                    "engine_state": engine.export_state(),
+                    "timestamp": datetime.now().isoformat()
+                }
+                if game_state.save_state(state_data):
+                    print("\n💾 Game state saved.")
+                else:
+                    print("\n❌ Failed to save game state.")
+
+            elif command == "load":
+                data = game_state.load_state()
+                if data and "engine_state" in data:
+                    engine.import_state(data["engine_state"])
+                    print("\n🔄 Game state loaded.")
+                else:
+                    print("\n❌ No saved state found.")
+
             elif command.startswith("enclave"):
                 parts = command.split()
                 if len(parts) > 1:
