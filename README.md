@@ -36,6 +36,8 @@ python3 simple_main.py
 - `prophecy` - Generate mystical prophecy about the drift field
 - `story` - View recent narrative threads from your timeline
 - `timeline` - Show information about all active timelines
+- `save` - Save game state to file
+- `load` - Load game state from file
 - `help` - Display all available commands
 - `quit` - Exit the drift field
 
