@@ -20,7 +20,12 @@ A mystical simulation system with procedural narrative generation, entropy mecha
 python3 run.py
 ```
 
-### Method 2: Direct Terminal Interface
+### Method 2: Tkinter GUI
+```bash
+python3 gui_simple.py
+```
+
+### Method 3: Direct Terminal Interface
 ```bash
 python3 simple_main.py
 ```
