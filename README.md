@@ -20,7 +20,12 @@ A mystical simulation system with procedural narrative generation, entropy mecha
 python3 run.py
 ```
 
-### Method 2: Direct Terminal Interface
+### Method 2: Tkinter GUI
+```bash
+python3 gui_simple.py
+```
+
+### Method 3: Direct Terminal Interface
 ```bash
 python3 simple_main.py
 ```
@@ -36,6 +41,8 @@ python3 simple_main.py
 - `prophecy` - Generate mystical prophecy about the drift field
 - `story` - View recent narrative threads from your timeline
 - `timeline` - Show information about all active timelines
+- `save` - Save game state to file
+- `load` - Load game state from file
 - `help` - Display all available commands
 - `quit` - Exit the drift field
 
